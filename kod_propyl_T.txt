@@ -1,0 +1,68 @@
+import cantera as ct
+from sdtoolbox.postshock import CJspeed
+from sdtoolbox.postshock import PostShock_eq
+import matplotlib.pyplot as plt
+
+T1 = 295
+mech = 'gri30.cti'
+gas = ct.Solution(mech)
+
+
+for phi in range(50,175,25):
+    P1=[]
+    X = 'O2:4.75, N2:17.86, C3H7:'+str(phi/100)
+    cjspeed = []
+    for P in range(100000,1250000,250000):
+        gas.TPX = T1,P,X
+        P1.append(P/100000)
+        U = CJspeed(P,T1,X,mech)
+        cjspeed.append(U)
+    plt.plot(P1, cjspeed, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial pressure [bar]')
+plt.ylabel('CJ speed [m/s]')
+plt.title('Cj detonation speed of propyl-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propyl_cjspeed(P1).png', dpi=1000)
+plt.show()
+
+for phi in range(50,175,25):
+    P1=[]
+    X = 'O2:4.75, N2:17.86, C3H7:'+str(phi/100)
+    PostShock_T = []
+    for P in range(100000,1250000,250000):
+        gas.TPX = T1,P,X
+        P1.append(P/100000)
+        U = CJspeed(P,T1,X,mech)
+        gas = PostShock_eq(U,P,T1,X,mech)
+        PostShock_T.append(gas.T)
+    plt.plot(P1, PostShock_T, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial pressure [bar]')
+plt.ylabel('Post shock temperature [K]')
+plt.title('Post shock temerature of propyl-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propyl_T(P1).png', dpi=1000)
+plt.show()
+
+for phi in range(50,175,25):
+    P1=[]
+    X = 'O2:4.75, N2:17.86, C3H7:'+str(phi/100)
+    PostShock_P = []
+    for P in range(100000,1250000,250000):
+        gas.TPX = T1,P,X
+        P1.append(P/100000)
+        U = CJspeed(P,T1,X,mech)
+        gas = PostShock_eq(U,P,T1,X,mech)
+        PostShock_P.append(gas.P/100000)
+    plt.plot(P1, PostShock_P, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial pressure [bar]')
+plt.ylabel('Post shock pressure [bar]')
+plt.title('Post shock pressure of propyl-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propyl_P(P1).png', dpi=1000)
+plt.show()

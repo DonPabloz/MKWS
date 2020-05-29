@@ -1,0 +1,68 @@
+import cantera as ct
+from sdtoolbox.postshock import CJspeed
+from sdtoolbox.postshock import PostShock_eq
+import matplotlib.pyplot as plt
+
+P1 = 100000
+mech = 'gri30.cti'
+gas = ct.Solution(mech)
+
+
+for phi in range(50,175,25):
+    T1=[]
+    X = 'O2:5, N2:18.8, C3H8:'+str(phi/100)
+    cjspeed = []
+    for T in range(250,2250,250):
+        gas.TPX = T,P1,X
+        T1.append(T)
+        U = CJspeed(P1,T,X,mech)
+        cjspeed.append(U)
+    plt.plot(T1, cjspeed, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial temperature [Kelvins]')
+plt.ylabel('CJ speed [m/s]')
+plt.title('Cj detonation speed of propane-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propane_cjspeed(T1).png', dpi=1000)
+plt.show()
+
+for phi in range(50,175,25):
+    T1=[]
+    X = 'O2:5, N2:18.8, C3H8:'+str(phi/100)
+    PostShock_T = []
+    for T in range(250,2250,250):
+        gas.TPX = T,P1,X
+        T1.append(T)
+        U = CJspeed(P1,T,X,mech)
+        gas = PostShock_eq(U,P1,T,X,mech)
+        PostShock_T.append(gas.T)
+    plt.plot(T1, PostShock_T, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial temperature [Kelvins]')
+plt.ylabel('Post shock temperature [K]')
+plt.title('Post shock temerature of propane-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propane_T(T1).png', dpi=1000)
+plt.show()
+
+for phi in range(50,175,25):
+    T1=[]
+    X = 'O2:5, N2:18.8, C3H8:'+str(phi/100)
+    PostShock_P = []
+    for T in range(250,2250,250):
+        gas.TPX = T,P1,X
+        T1.append(T)
+        U = CJspeed(P1,T,X,mech)
+        gas = PostShock_eq(U,P1,T,X,mech)
+        PostShock_P.append(gas.P/100000)
+    plt.plot(T1, PostShock_P, label="phi=%.2f" % (phi/100))
+
+plt.legend()
+plt.xlabel('Initial temperature [Kelvins]')
+plt.ylabel('Post shock pressure [bar]')
+plt.title('Post shock pressure of propane-air mixture', fontweight='bold')
+plt.grid()
+plt.savefig('propane_P(T1).png', dpi=1000)
+plt.show()
